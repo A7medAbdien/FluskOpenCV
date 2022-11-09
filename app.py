@@ -1,56 +1,34 @@
-from flask import Flask, redirect, render_template, request, url_for
-
-"""
-this is the WSGL applicaiton,
-which we interact with,
-standard to communicate with the server
-"""
+from flask import Flask, render_template, Response
+import cv2
 
 app = Flask(__name__)
+camera = cv2.VideoCapture(0)
 
 
-"""
-this a decorator,
-it takes us to this url
-"""
+def generate_frames():
+    while True:
+
+        # read the camera frame
+        success, frame = camera.read()
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 @app.route('/')
-def welcome():
-    # return "Hi there! WOW"
+def index():
     return render_template('index.html')
 
 
-@app.route('/<int:mark>')
-def mark(mark):
-    if mark > 50:
-        result = "gj"
-    else:
-        result = "bj"
-    # return result + ": " + str(mark)
-    # url_for(name_of_def,its_prams)
-    return redirect(url_for(result, score=mark))
+@app.route('/video')
+def video():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@ app.route('/submit', methods=['POST', 'GET'])
-def submit():
-    mark = 0
-    if request.method == 'POST':
-        mark = float(request.form['mark'])
-    if mark > 50:
-        return redirect(url_for("mark", mark=mark))
-    return redirect(url_for("mark", mark=mark))
-
-
-@ app.route('/gj/<int:score>')
-def gj(score):
-    return render_template('res.html', score=score, res="GJ")
-
-
-@ app.route('/BJ/<int:score>')
-def bj(score):
-    return render_template('res.html', score=score, res="BJ")
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
