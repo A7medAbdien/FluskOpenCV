@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, render_template, request, url_for
 
 """
 this is the WSGL applicaiton,
@@ -17,7 +17,8 @@ it takes us to this url
 
 @app.route('/')
 def welcome():
-    return "Hi there! WOW"
+    # return "Hi there! WOW"
+    return render_template('index.html')
 
 
 @app.route('/<int:mark>')
@@ -31,14 +32,24 @@ def mark(mark):
     return redirect(url_for(result, score=mark))
 
 
+@ app.route('/submit', methods=['POST', 'GET'])
+def submit():
+    mark = 0
+    if request.method == 'POST':
+        mark = float(request.form['mark'])
+    if mark > 50:
+        return redirect(url_for("mark", mark=mark))
+    return redirect(url_for("mark", mark=mark))
+
+
 @ app.route('/gj/<int:score>')
 def gj(score):
-    return str(score)
+    return render_template('res.html', score=score, res="GJ")
 
 
-@ app.route('/bj/<int:score>')
+@ app.route('/BJ/<int:score>')
 def bj(score):
-    return (score)
+    return render_template('res.html', score=score, res="BJ")
 
 
 if __name__ == '__main__':
