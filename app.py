@@ -26,33 +26,28 @@ def generate_frames():
             # 1. Detection
             results = pose.process(frame)
 
-            # 2. Add the result by OpenCV
-            # 4.1 Extract landmarks
+            # 2. Add the renders by OpenCV
             try:
 
                 nose, right_shoulder, left_shoulder, right_hip, left_hip = extract_landmarks(
                     results.pose_landmarks.landmark)
 
-                # 4.2 Get the distance based on drawable
-                right_side_distance = math.sqrt(
-                    (right_shoulder[0]-right_hip[0])**2 + (right_shoulder[1]-right_hip[1])**2)
-                left_side_distance = math.sqrt(
-                    (left_shoulder[0]-left_hip[0])**2 + (left_shoulder[1]-left_hip[1])**2)
+                # 2.2 Get the distance based on drawable
+                right_side_distance = get_distance(right_shoulder, right_hip)
+                left_side_distance = get_distance(left_shoulder, left_hip)
                 distance = (right_side_distance + left_side_distance)/2
                 # print(distance)
 
                 displayed_distance = str(f'{distance:.4f}')
 
                 # Show massage
-                # we process the elbow coordinates to change them to the size of the cam feed
+                # we getting those to change them to the size of the cam feed
                 IMG_HEIGHT, IMG_WIDTH = frame.shape[:2]
 
                 cv2.putText(frame, displayed_distance,
                             tuple(np.multiply(
                                 nose, [IMG_WIDTH, IMG_HEIGHT]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,
-                                                            255, 255), 2, cv2.LINE_AA
-                            )
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
             except:
                 pass
 
@@ -80,20 +75,39 @@ def process_image(frame, pose):
     image.flags.writeable = True
     yield results
 
+# Extract landmarks
+
 
 def extract_landmarks(landmarks):
     nose = [landmarks[mp_pose.PoseLandmark.NOSE.value].x,
-            landmarks[mp_pose.PoseLandmark.NOSE.value].y]
+            landmarks[mp_pose.PoseLandmark.NOSE.value].y,
+            landmarks[mp_pose.PoseLandmark.NOSE.value].z]
 
     right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                      landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                      landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y,
+                      landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].z]
+
     right_hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
-                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP].y]
+                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP].y,
+                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP].z]
+
     left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y,
+                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].z]
+
     left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                landmarks[mp_pose.PoseLandmark.LEFT_HIP].y]
+                landmarks[mp_pose.PoseLandmark.LEFT_HIP].y,
+                landmarks[mp_pose.PoseLandmark.LEFT_HIP].z]
     yield nose, right_shoulder, left_shoulder, right_hip, left_hip
+
+# Get the distance
+
+
+def get_distance(a, b):
+    return math.sqrt(
+        (a[0]-b[0])**2 +
+        (a[1]-b[1])**2 +
+        (a[2]-b[2])**2)
 
 
 @app.route('/')
