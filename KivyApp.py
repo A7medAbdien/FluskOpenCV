@@ -24,6 +24,7 @@ mp_drawing = mp.solutions.drawing_utils
 # import the pose solution model
 mp_pose = mp.solutions.pose
 
+
 class CamApp(App):
 
     state = "Okay"
