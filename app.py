@@ -1,3 +1,4 @@
+from mediapipe.framework.formats import landmark_pb2
 from flask import Flask, render_template, Response
 import cv2
 import mediapipe as mp
@@ -52,8 +53,41 @@ def generate_frames():
                 pass
 
             # Adding drawable
+            landmark_subset = landmark_pb2.NormalizedLandmarkList(
+                landmark=[
+                    # results.pose_landmarks.landmark[0],
+                    results.pose_landmarks.landmark[11],
+                    results.pose_landmarks.landmark[12],
+                    results.pose_landmarks.landmark[23],
+                    results.pose_landmarks.landmark[24],
+                ]
+            )
+            # print(landmark_subset.landmark)
             mp_drawing.draw_landmarks(
-                frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,)
+                # frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,)
+                frame, landmark_list=landmark_subset)
+
+            """draw the subset
+            poses = landmark_subset.landmark
+            for i in range(0, len(poses)-1, 2):
+                start_idx = [
+                    poses[i].x,
+                    poses[i].y
+                ]
+                end_idx = [
+                    poses[i+1].x,
+                    poses[i+1].y
+                ]
+                IMG_HEIGHT, IMG_WIDTH = frame.shape[:2]
+                # print(start_idx)
+
+                cv2.line(frame,
+                         tuple(np.multiply(start_idx[:2], [
+                               IMG_WIDTH, IMG_HEIGHT]).astype(int)),
+                         tuple(np.multiply(end_idx[:2], [
+                               IMG_WIDTH, IMG_HEIGHT]).astype(int)),
+                         (255, 0, 0), 9)
+                """
 
         # Render the frame
         ret, buffer = cv2.imencode('.jpg', frame)
