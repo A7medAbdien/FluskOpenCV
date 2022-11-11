@@ -36,7 +36,7 @@ def generate_frames():
                 right_side_distance = get_distance(right_shoulder, right_hip)
                 left_side_distance = get_distance(left_shoulder, left_hip)
                 distance = (right_side_distance + left_side_distance)/2
-                # print(distance)
+                # print("distance")
 
                 displayed_distance = str(f'{distance:.4f}')
 
@@ -46,7 +46,7 @@ def generate_frames():
 
                 cv2.putText(frame, displayed_distance,
                             tuple(np.multiply(
-                                nose, [IMG_WIDTH, IMG_HEIGHT]).astype(int)),
+                                nose[:2], [IMG_WIDTH, IMG_HEIGHT]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
             except:
                 pass
@@ -98,13 +98,13 @@ def extract_landmarks(landmarks):
     left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
                 landmarks[mp_pose.PoseLandmark.LEFT_HIP].y,
                 landmarks[mp_pose.PoseLandmark.LEFT_HIP].z]
-    yield nose, right_shoulder, left_shoulder, right_hip, left_hip
+    return nose, right_shoulder, left_shoulder, right_hip, left_hip
 
 # Get the distance
 
 
 def get_distance(a, b):
-    yield math.sqrt(
+    return math.sqrt(
         (a[0]-b[0])**2 +
         (a[1]-b[1])**2 +
         0.5*(a[2]-b[2])**2)
