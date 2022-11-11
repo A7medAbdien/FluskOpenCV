@@ -29,19 +29,9 @@ def generate_frames():
             # 2. Add the result by OpenCV
             # 4.1 Extract landmarks
             try:
-                landmarks = results.pose_landmarks.landmark
 
-                nose = [landmarks[mp_pose.PoseLandmark.NOSE.value].x,
-                        landmarks[mp_pose.PoseLandmark.NOSE.value].y]
-
-                right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                                  landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-                right_hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
-                             landmarks[mp_pose.PoseLandmark.RIGHT_HIP].y]
-                left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                                 landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-                left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                            landmarks[mp_pose.PoseLandmark.LEFT_HIP].y]
+                nose, right_shoulder, left_shoulder, right_hip, left_hip = extract_landmarks(
+                    results.pose_landmarks.landmark)
 
                 # 4.2 Get the distance based on drawable
                 right_side_distance = math.sqrt(
@@ -90,8 +80,20 @@ def process_image(frame, pose):
     image.flags.writeable = True
     yield results
 
-    # 3. Formatting output to OpenCV, recolor back to BGR
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+def extract_landmarks(landmarks):
+    nose = [landmarks[mp_pose.PoseLandmark.NOSE.value].x,
+            landmarks[mp_pose.PoseLandmark.NOSE.value].y]
+
+    right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                      landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+    right_hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP].y]
+    left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
+                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+    left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+                landmarks[mp_pose.PoseLandmark.LEFT_HIP].y]
+    yield nose, right_shoulder, left_shoulder, right_hip, left_hip
 
 
 @app.route('/')
