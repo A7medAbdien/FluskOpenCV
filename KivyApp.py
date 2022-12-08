@@ -45,7 +45,7 @@ class CamApp(App):
         layout.add_widget(self.state_label)
 
         # get image form webcam
-        self.capture = cv2.VideoCapture(0)
+        self.capture = cv2.VideoCapture(1)
         # schedule_interval: will do this event every x seconds
         Clock.schedule_interval(self.update, 1.0/33.0)
 
