@@ -1,3 +1,4 @@
+from mediapipe.framework.formats import landmark_pb2
 from flask import Flask, render_template, Response
 import cv2
 import mediapipe as mp
@@ -63,10 +64,10 @@ def generate_frames():
             except:
                 pass
 
-            # print(landmark_subset.landmark)
+            # Adding drawable
             mp_drawing.draw_landmarks(
-                frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,)
-            # frame, landmark_list=landmark_subset)
+                # frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,)
+                frame, landmark_list=landmark_subset)
 
             """draw the subset
             poses = landmark_subset.landmark
