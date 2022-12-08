@@ -35,8 +35,6 @@ def generate_frames():
         # Render keypoints and landmarks
         loop_through_people(frame, keypoints_with_scores, EDGES, 0.1)
 
-        # cv2.imshow('Movenet Multipose', frame)
-
         # Render the frame
         buffer = cv2.imencode('.jpg', frame)[1]
         frame = buffer.tobytes()
