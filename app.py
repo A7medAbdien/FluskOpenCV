@@ -49,19 +49,20 @@ def generate_frames():
                             tuple(np.multiply(
                                 nose[:2], [IMG_WIDTH, IMG_HEIGHT]).astype(int)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+
+                # Adding drawable
+                landmark_subset = landmark_pb2.NormalizedLandmarkList(
+                    landmark=[
+                        # results.pose_landmarks.landmark[0],
+                        results.pose_landmarks.landmark[11],
+                        results.pose_landmarks.landmark[12],
+                        results.pose_landmarks.landmark[23],
+                        results.pose_landmarks.landmark[24],
+                    ]
+                )
             except:
                 pass
 
-            # Adding drawable
-            landmark_subset = landmark_pb2.NormalizedLandmarkList(
-                landmark=[
-                    # results.pose_landmarks.landmark[0],
-                    results.pose_landmarks.landmark[11],
-                    results.pose_landmarks.landmark[12],
-                    results.pose_landmarks.landmark[23],
-                    results.pose_landmarks.landmark[24],
-                ]
-            )
             # print(landmark_subset.landmark)
             mp_drawing.draw_landmarks(
                 frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,)
@@ -90,7 +91,7 @@ def generate_frames():
                 """
 
         # Render the frame
-        ret, buffer = cv2.imencode('.jpg', frame)
+        buffer = cv2.imencode('.jpg', frame)[1]
         frame = buffer.tobytes()
 
         yield (b'--frame\r\n'
