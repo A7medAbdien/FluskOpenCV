@@ -1,4 +1,6 @@
 flask
 opencv-python
-kivy
-mediapipe
+tensorflow==2.4.1 
+tensorflow-gpu==2.4.1 
+tensorflow-hub
+matplotlib

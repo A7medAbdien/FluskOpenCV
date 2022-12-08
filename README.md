@@ -78,3 +78,91 @@ for i in range(0, len(poses)-1, 2):
                 (255, 0, 0), 9)
 ```
 
+```py
+        with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+            # 1. Detection
+            results = pose.process(frame)
+
+            # 2. Add the renders by OpenCV
+            try:
+
+                # Adding drawable
+                landmark_subset = landmark_pb2.NormalizedLandmarkList(
+                    landmark=[
+                        # results.pose_landmarks.landmark[0],
+                        results.pose_landmarks.landmark[11],
+                        results.pose_landmarks.landmark[12],
+                        results.pose_landmarks.landmark[23],
+                        results.pose_landmarks.landmark[24],
+                    ]
+                )
+            except:
+                pass
+
+            # Adding drawable
+            mp_drawing.draw_landmarks(
+                # frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,)
+                frame, landmark_list=landmark_subset)
+
+            """draw the subset
+            poses = landmark_subset.landmark
+            for i in range(0, len(poses)-1, 2):
+                start_idx = [
+                    poses[i].x,
+                    poses[i].y
+                ]
+                end_idx = [
+                    poses[i+1].x,
+                    poses[i+1].y
+                ]
+                IMG_HEIGHT, IMG_WIDTH = frame.shape[:2]
+                # print(start_idx)
+
+                cv2.line(frame,
+                         tuple(np.multiply(start_idx[:2], [
+                               IMG_WIDTH, IMG_HEIGHT]).astype(int)),
+                         tuple(np.multiply(end_idx[:2], [
+                               IMG_WIDTH, IMG_HEIGHT]).astype(int)),
+                         (255, 0, 0), 9)
+                """
+
+
+
+# Process image
+
+
+def process_image(frame, pose):
+    # 1. Formatting input to MediaPipe, recolor image to RGB
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    image.flags.writeable = False
+
+    # 2. Detection
+    results = pose.process(image)
+    image.flags.writeable = True
+    yield results
+
+# Extract landmarks
+
+
+def extract_landmarks(landmarks):
+    nose = [landmarks[mp_pose.PoseLandmark.NOSE.value].x,
+            landmarks[mp_pose.PoseLandmark.NOSE.value].y,
+            landmarks[mp_pose.PoseLandmark.NOSE.value].z]
+
+    right_shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                      landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y,
+                      landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].z]
+
+    right_hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP].y,
+                 landmarks[mp_pose.PoseLandmark.RIGHT_HIP].z]
+
+    left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
+                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y,
+                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].z]
+
+    left_hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+                landmarks[mp_pose.PoseLandmark.LEFT_HIP].y,
+                landmarks[mp_pose.PoseLandmark.LEFT_HIP].z]
+    return nose, right_shoulder, left_shoulder, right_hip, left_hip
+```
