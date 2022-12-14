@@ -49,7 +49,7 @@ def generate_frames():
 def loop_through_people(frame, keypoints_with_scores, edges, confidence_threshold):
     for person in keypoints_with_scores:
         draw_connections(frame, person, edges, confidence_threshold)
-        # draw_keypoints(frame, person, confidence_threshold)
+        draw_distance(frame, person, confidence_threshold)
 
 
 # [nose, left eye, right eye, left ear, right ear, left shoulder, right shoulder, left elbow, right elbow, left wrist, right wrist, left hip, right hip, left knee, right knee, left ankle, right ankle]
@@ -76,7 +76,37 @@ def draw_connections(frame, keypoints, edges, confidence_threshold):
             cv2.line(frame, (int(x1), int(y1)),
                      (int(x2), int(y2)), (0, 0, 255), 4)
 
+
 # Get the distance
+
+
+def draw_distance(frame, keypoints, confidence_threshold):
+    y, x, c = frame.shape
+    shaped = np.squeeze(np.multiply(keypoints, [y, x, 1]))
+
+    nose = shaped[0]
+    right_shoulder = shaped[5]
+    left_shoulder = shaped[6]
+    right_hip = shaped[11]
+    left_hip = shaped[12]
+
+    # 2.2 Get the distance based on drawable
+    #
+    if (right_shoulder[-1] > confidence_threshold) & (left_shoulder[-1] > confidence_threshold) & (right_hip[-1] > confidence_threshold) & (left_hip[-1] > confidence_threshold):
+        right_side_distance = get_distance(right_shoulder, right_hip)
+        left_side_distance = get_distance(left_shoulder, left_hip)
+        distance = (right_side_distance + left_side_distance)/2
+        displayed_distance = str(f'{distance:.2f}')
+    else:
+        displayed_distance = "UnKnown"
+
+    # Show massage
+    ky, kx, kp_conf = nose
+    if kp_conf > confidence_threshold:
+        cv2.circle(frame, (int(kx), int(ky)), 6, (0, 255, 0), -1)
+        cv2.putText(frame, displayed_distance,
+                    (int(kx), int(ky)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
 
 
 def get_distance(a, b):
@@ -85,12 +115,12 @@ def get_distance(a, b):
         (a[1]-b[1])**2)
 
 
-@app.route('/')
+@ app.route('/')
 def index():
     return render_template('index.html')
 
 
-@app.route('/video')
+@ app.route('/video')
 def video():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
