@@ -1,3 +1,4 @@
+import math
 from flask import Flask, render_template, Response
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -50,41 +51,15 @@ def loop_through_people(frame, keypoints_with_scores, edges, confidence_threshol
         draw_connections(frame, person, edges, confidence_threshold)
         # draw_keypoints(frame, person, confidence_threshold)
 
-# Draw Keypoints
-
-
-def draw_keypoints(frame, keypoints, confidence_threshold):
-    y, x, c = frame.shape
-    shaped = np.squeeze(np.multiply(keypoints, [y, x, 1]))
-
-    for kp in shaped:
-        ky, kx, kp_conf = kp
-        if kp_conf > confidence_threshold:
-            cv2.circle(frame, (int(kx), int(ky)), 6, (0, 255, 0), -1)
-
 
 # [nose, left eye, right eye, left ear, right ear, left shoulder, right shoulder, left elbow, right elbow, left wrist, right wrist, left hip, right hip, left knee, right knee, left ankle, right ankle]
 # [0,5,6,11,12]
 
 EDGES = {
-    # (0, 1): 'c',
-    # (0, 2): 'c',
-    # (1, 3): 'm',
-    # (2, 4): 'c',
-    # (0, 5): 'm',
-    # (0, 6): 'c',
-    # (5, 7): 'm',
-    # (7, 9): 'm',
-    # (6, 8): 'c',
-    # (8, 10): 'c',
     (5, 6): 'shoulders',
     (5, 11): 'right shoulder',
     (6, 12): 'left shoulder',
     (11, 12): 'hips',
-    # (11, 13): 'm',
-    # (13, 15): 'm',
-    # (12, 14): 'c',
-    # (14, 16): 'c'
 }
 
 
@@ -107,8 +82,7 @@ def draw_connections(frame, keypoints, edges, confidence_threshold):
 def get_distance(a, b):
     return math.sqrt(
         (a[0]-b[0])**2 +
-        (a[1]-b[1])**2 +
-        0.5*(a[2]-b[2])**2)
+        (a[1]-b[1])**2)
 
 
 @app.route('/')
