@@ -10,9 +10,11 @@ import numpy as np
 model = hub.load('https://tfhub.dev/google/movenet/multipose/lightning/1')
 movenet = model.signatures['serving_default']
 
+safe_distance = 120
+
+
 app = Flask(__name__)
 camera = cv2.VideoCapture(1)
-safe_distance = 200
 
 
 def generate_frames():
@@ -102,6 +104,7 @@ def draw_distance(frame, keypoints, confidence_threshold, safe_distance):
         right_side_distance = get_distance(right_shoulder, right_hip)
         left_side_distance = get_distance(left_shoulder, left_hip)
         distance = (right_side_distance + left_side_distance)/2
+        distance = get_actual_distance(distance)
         displayed_distance = str(f'{distance:.2f}')
     else:
         displayed_distance = "UnKnown"
@@ -114,10 +117,20 @@ def draw_distance(frame, keypoints, confidence_threshold, safe_distance):
         cv2.putText(frame, displayed_distance,
                     (int(kx), int(ky)),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
-        if int(distance) < safe_distance:
+        if distance < safe_distance:
             cv2.putText(frame, "Alert",
-                        (int(x/2), 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 3, cv2.LINE_AA)
+                        (int(x/2), 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+
+
+x = []
+y = []
+coff = np.polyfit(x, y, 2)  # y = ax^2 + bx + c
+a, b, c = coff
+
+
+def get_actual_distance(distance):
+    return a * distance**2 + b * distance + c
 
 
 def get_distance(a, b):
