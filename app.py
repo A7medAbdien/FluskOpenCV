@@ -12,6 +12,7 @@ movenet = model.signatures['serving_default']
 
 app = Flask(__name__)
 camera = cv2.VideoCapture(1)
+safe_distance = 200
 
 
 def generate_frames():
@@ -34,7 +35,8 @@ def generate_frames():
             :, :, :51].reshape((6, 17, 3))
 
         # Render keypoints and landmarks
-        loop_through_people(frame, keypoints_with_scores, EDGES, 0.3)
+        loop_through_people(frame, keypoints_with_scores,
+                            EDGES, 0.3, safe_distance)
 
         # Render the frame
         buffer = cv2.imencode('.jpg', frame)[1]
@@ -46,10 +48,10 @@ def generate_frames():
 # Function to loop through each person detected and render
 
 
-def loop_through_people(frame, keypoints_with_scores, edges, confidence_threshold):
+def loop_through_people(frame, keypoints_with_scores, edges, confidence_threshold, safe_distance):
     for person in keypoints_with_scores:
         draw_connections(frame, person, edges, confidence_threshold)
-        draw_distance(frame, person, confidence_threshold)
+        draw_distance(frame, person, confidence_threshold, safe_distance)
 
 
 # [nose, left eye, right eye, left ear, right ear, left shoulder, right shoulder, left elbow, right elbow, left wrist, right wrist, left hip, right hip, left knee, right knee, left ankle, right ankle]
@@ -80,10 +82,11 @@ def draw_connections(frame, keypoints, edges, confidence_threshold):
 # Get the distance
 
 
-def draw_distance(frame, keypoints, confidence_threshold):
+def draw_distance(frame, keypoints, confidence_threshold, safe_distance):
     y, x, c = frame.shape
     shaped = np.squeeze(np.multiply(keypoints, [y, x, 1]))
 
+    distance = 0
     nose = shaped[0]
     right_shoulder = shaped[5]
     left_shoulder = shaped[6]
@@ -91,8 +94,11 @@ def draw_distance(frame, keypoints, confidence_threshold):
     left_hip = shaped[12]
 
     # 2.2 Get the distance based on drawable
-    #
-    if (right_shoulder[-1] > confidence_threshold) & (left_shoulder[-1] > confidence_threshold) & (right_hip[-1] > confidence_threshold) & (left_hip[-1] > confidence_threshold):
+    if ((right_shoulder[-1] > confidence_threshold) &
+            (left_shoulder[-1] > confidence_threshold) &
+            (right_hip[-1] > confidence_threshold) &
+            (left_hip[-1] > confidence_threshold)):
+
         right_side_distance = get_distance(right_shoulder, right_hip)
         left_side_distance = get_distance(left_shoulder, left_hip)
         distance = (right_side_distance + left_side_distance)/2
@@ -103,10 +109,15 @@ def draw_distance(frame, keypoints, confidence_threshold):
     # Show massage
     ky, kx, kp_conf = nose
     if kp_conf > confidence_threshold:
-        cv2.circle(frame, (int(kx), int(ky)), 6, (0, 255, 0), -1)
+        cv2.circle(frame, (int(kx), int(ky)), 6,
+                   (kx % 255, ky % 255, (ky-kx)*5 % 255), -1)
         cv2.putText(frame, displayed_distance,
                     (int(kx), int(ky)),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
+        if int(distance) < safe_distance:
+            cv2.putText(frame, "Alert",
+                        (int(x/2), 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 3, cv2.LINE_AA)
 
 
 def get_distance(a, b):

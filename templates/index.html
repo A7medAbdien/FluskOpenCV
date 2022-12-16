@@ -5,11 +5,22 @@
 <body>
     <h1>Live streaming</h1>
     <div>
-
         <img src="{{ url_for('video') }}" width="100%" />
     </div>
 
-</body>
 
+    <audio id="myAudio">
+        <source src="horse.ogg" type="audio/ogg">
+        <source src="horse.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <p>Click the buttons to play or pause the audio.</p>
+
+    <button onclick="playAudio()" type="button">Play Audio</button>
+    <button onclick="pauseAudio()" type="button">Pause Audio</button>
+
+    <script type="text/javascript" src="{{ url_for('static',filename='script/script.js') }}"></script>
+</body>
 
 </html>
