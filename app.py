@@ -127,6 +127,7 @@ x = []
 y = []
 coff = np.polyfit(x, y, 2)  # y = ax^2 + bx + c
 a, b, c = coff
+print(a, b, c)
 
 
 def get_actual_distance(distance):
