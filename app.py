@@ -104,7 +104,7 @@ def draw_distance(frame, keypoints, confidence_threshold, safe_distance):
         right_side_distance = get_distance(right_shoulder, right_hip)
         left_side_distance = get_distance(left_shoulder, left_hip)
         distance = (right_side_distance + left_side_distance)/2
-        distance = get_actual_distance(distance)
+        # distance = get_actual_distance(distance)
         displayed_distance = str(f'{distance:.2f}')
     else:
         displayed_distance = "UnKnown"
