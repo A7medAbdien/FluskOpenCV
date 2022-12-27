@@ -123,15 +123,15 @@ def draw_distance(frame, keypoints, confidence_threshold, safe_distance):
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
 
-x = []
-y = []
-coff = np.polyfit(x, y, 2)  # y = ax^2 + bx + c
-a, b, c = coff
-print(a, b, c)
+# x = []
+# y = []
+# coff = np.polyfit(x, y, 2)  # y = ax^2 + bx + c
+# a, b, c = coff
+# print(a, b, c)
 
 
-def get_actual_distance(distance):
-    return a * distance**2 + b * distance + c
+# def get_actual_distance(distance):
+#     return a * distance**2 + b * distance + c
 
 
 def get_distance(a, b):
